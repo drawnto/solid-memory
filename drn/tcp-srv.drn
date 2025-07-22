@@ -1,0 +1,19 @@
+DEFINITION: Server is the drone running this script
+
+WORKFLOW.shake_listen: Server receives a message from a drone consisting of "SYN " followed by 1 number
+  DEFINITION: Client is the drone that has sent the message received by this workflow
+  DEFINITION: Client sequence number is the number in the message received by this workflow
+  DEFINITION: Server sequence number is server's drone serial number
+
+  TASK: Send a message to Client containing "SYN-ACK " followed by Server sequence number followed by Client sequence number plus 1
+  TASK.shake_receive: Wait for a reply from Client
+
+  CONDITION: Reply from client does not contain "ACK " followed by a number
+    TASK: Send a reply indicating that the Client has not sent a valid Acknowledgement message
+    CONTROL: End execution of this workflow
+
+  DEFINITION: Client acknowledgement number is the number contained in the message received in TASK.shake_receive
+
+  CONDITION: Client acknowledgement number is not equal to Server sequence number plus 1
+    TASK: Send a reply indicating that the Client has sent an invalid acknowledgement number
+    CONTROL: End execution of this workflow

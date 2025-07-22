@@ -1,0 +1,20 @@
+DEFINITION: Client is the drone running this script
+DEFINITION: Server is the drone indicated during activation of this script
+DEFINITION: Client sequence number is client's drone serial number
+
+TASK: Send a message to Server containing "SYN " followed by sequence number
+
+TASK.shake_receive: Wait for a reply from Server
+
+CONDITION: Reply from server does not contain "SYN-ACK " followed by two numbers
+  TASK: Send a reply indicating that the Server has not sent a valid Synchronize-Acknowledgement message
+  CONTROL: End execution of this file
+
+DEFINITION: Server sequence number is the first number in the message received in TASK.shake_receive
+DEFINITION: Server acknowledgement number is the second number in the message received in TASK.shake_receive
+
+CONDITION: Server acknowledgment number is not equal to Client sequence number plus 1
+  TASK: Send a message indicating that Server has sent an invalid acknowledgement number
+  CONTROL: End execution of this file
+
+TASK: Send a message to Server containing "ACK " followed by Server sequence number plus 1
